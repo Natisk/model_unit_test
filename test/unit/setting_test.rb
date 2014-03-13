@@ -29,11 +29,6 @@ class SettingTest < ActiveSupport::TestCase
     assert !setting.save
   end
 
-  test 'should not save setting with value shorter than 3 symbols' do
-    setting = Setting.new(field_name: 'registered', field_type: 'bool', field_value: 'tr')
-    assert !setting.save
-  end
-
   test 'should not save setting with type shorter than 3 symbols' do
     setting = Setting.new(field_name: 'registered', field_type: 'bo', field_value: 'true')
     assert !setting.save

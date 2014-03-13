@@ -4,23 +4,28 @@ class Setting < ActiveRecord::Base
 
   validates :field_name, presence: true, uniqueness: true, length: {minimum: 3, maximum: 45}
   validates :field_type, presence: true, length: {minimum: 3, maximum: 45}
-  validates :field_value, presence: true, length: {minimum: 3, maximum: 45}
+  validates :field_value, presence: true, length: {minimum: 1, maximum: 45}
 
-  def self.get_val(name)
-    self.where('field_name = :user_val', user_val: name)
+  def self.get(name)
+    Rails.cache.fetch("cached_#{name}") do
+      Setting.where('field_name = :term', term: name).first
+    end
   end
 
-  def self.set_val(name, value, type)
-    self.create(field_name: name, field_value: value, field_type: type)
+  def self.set(name, value)
+    obj = Setting.where('field_name = :term', term: name).first
+    type = value.class.to_s
+    if obj.blank?
+      Setting.create(field_name: name, field_value: value, field_type: type)
+    else
+      obj.update_attributes(field_name: name, field_value: value, field_type: type)
+    end
   end
 
-  def update_val(name, value, type)
-    self.update_attributes(field_value: value, field_type: type)
-  end
-
-  def cached_setting(name)
-    Rails.cache.fetch("cached_setting_#{name}") do
-      Setting.where('field_name = :term', term: name)
+  def self.unset(*args)
+    args.each do |arg|
+      to_del = Setting.get(arg)
+      to_del.destroy
     end
   end
 
