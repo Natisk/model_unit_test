@@ -51,23 +51,27 @@ class SettingTest < ActiveSupport::TestCase
 
   test 'should get the correct value' do
     Setting.create(field_name: 'registered', field_type: 'bool', field_value: 'true')
-    test1 = Setting.where(field_name: 'registered')
-    test2 = Setting.get_val('registered')
-    assert_equal test1.first.id, test2.first.id
+    test1 = Setting.where(field_name: 'registered').first
+    test2 = Setting.get('registered')
+    assert_equal test1.id, test2.id
   end
 
   test 'should create a setting' do
     Setting.destroy_all
-    Setting.create(field_name: 'registered', field_type: 'bool', field_value: 'true')
-    Setting.set_val('user', 'integer', '123')
-    test = Setting.all
-    assert_equal test.length, 2
+    Setting.create(field_name: 'registered', field_type: 'Fixnum', field_value: 10)
+    test1 = Setting.set('user', 10)
+    test2 = Setting.all
+    assert_equal test1.field_type, 'Fixnum'
+    assert_equal test2.length, 2
   end
 
-  test 'should update a setting' do
-    up = Setting.create(field_name: 'registered', field_type: 'bool', field_value: 'true')
-    up.update_val('registered', 'false', 'bull')
-    assert_equal up.field_type, 'bull'
+  test 'should remove all settings' do
+    Setting.destroy_all
+    Setting.create(field_name: 'registered', field_type: 'Fixnum', field_value: 10)
+    Setting.create(field_name: 'email', field_type: 'String', field_value: 'my_email')
+    Setting.unset('email', 'registered')
+    total = Setting.all
+    assert_equal total.length, 0
   end
 
 end
